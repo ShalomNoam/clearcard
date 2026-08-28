@@ -9,8 +9,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  // שימוש בגרסת v1 היציבה עבור 1.5-flash
+  const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
 
   const { messages, system } = req.body || {};
 
@@ -29,7 +30,6 @@ export default async function handler(req, res) {
     };
   }
 
-  // לולאת ניסיונות חוזרים במקרה של עומס 503
   let lastError = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -47,11 +47,11 @@ export default async function handler(req, res) {
       }
 
       if (response.status === 503 && attempt < 3) {
-        // המתנה של שנייה לפני ניסיון חוזר
         await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
         continue;
       }
 
+      console.error("Gemini Error:", data);
       return res.status(response.status).json({
         error: data.error?.message || `API error ${response.status}`
       });
@@ -64,5 +64,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(500).json({ error: lastError?.message || "Service temporarily unavailable" });
+  return res.status(500).json({ error: lastError?.message || "Internal server error" });
 }
