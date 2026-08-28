@@ -36,7 +36,9 @@
     logOut: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
     banknote: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 9v.01M18 15v.01"/>',
     repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
-    smartphone: '<rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>'
+    smartphone: '<rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/>',
+    x: '<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+    flagCheckered: '<path d="M5 21V4"/><path d="M5 4h14l-3 4 3 4H5"/>'
   };
   function icon(name, size){
     size = size || 18;
@@ -199,6 +201,7 @@
   const modeHint = document.getElementById("mode-hint");
   const manualControls = document.getElementById("manual-controls");
   const autoControls = document.getElementById("auto-controls");
+  const manualFinishBtn = document.getElementById("manual-finish");
   const personaFadeTarget = document.getElementById("persona-fade-target");
   const personaDisabledBanner = document.getElementById("persona-disabled-banner");
   const chatBody = document.getElementById("chat-body");
@@ -224,6 +227,7 @@
     tabAuto.setAttribute("aria-pressed", m==="auto");
     manualControls.style.display = m==="manual" ? "flex" : "none";
     autoControls.style.display = m==="auto" ? "flex" : "none";
+    manualFinishBtn.style.display = m==="manual" ? "flex" : "none";
     modeHint.textContent = MODE_HINTS[m];
     const personaDisabled = m === "manual";
     personaFadeTarget.classList.toggle("disabled", personaDisabled);
@@ -290,10 +294,34 @@
       statusDot.classList.remove("busy");
       statusText.textContent = "מחובר";
       manualInput.focus();
+      updateManualFinishState();
     }
   }
   manualSend.addEventListener("click", sendManual);
   manualInput.addEventListener("keydown", e => { if (e.key === "Enter") sendManual(); });
+
+  // "End & judge" - runs the same judge used in auto mode, but on the
+  // human-driven conversation. The person typing is standing in for the
+  // "persona" (customer) role the judge prompt expects.
+  function updateManualFinishState(){
+    manualFinishBtn.disabled = manualHistory.length === 0 || manualBusy;
+  }
+
+  manualFinishBtn.addEventListener("click", async () => {
+    if (manualHistory.length === 0) return;
+    manualFinishBtn.disabled = true;
+    const transcriptForJudge = manualHistory.map((m, i) => ({
+      index: i,
+      speaker: m.role === "user" ? "persona" : "bot",
+      text: m.content
+    }));
+    try {
+      await judgeTranscript(transcriptForJudge);
+    } finally {
+      updateManualFinishState();
+    }
+  });
+  updateManualFinishState();
 
   // ---------- AUTO MODE ----------
   let autoTranscript = []; // {speaker:'persona'|'bot', text}
@@ -305,7 +333,76 @@
   const progressText = document.getElementById("progress-text");
   const progressCount = document.getElementById("progress-count");
   const progressFill = document.getElementById("progress-fill");
-  const verdictBody = document.getElementById("verdict-body");
+
+  // ---------- JUDGE MODAL ----------
+  // Judge results (from either mode) no longer live in an always-visible
+  // panel - they only show up in this popup, opened on demand.
+  const verdictModal = document.getElementById("verdict-modal");
+  const verdictModalBody = document.getElementById("verdict-modal-body");
+  const verdictModalClose = document.getElementById("verdict-modal-close");
+
+  function openVerdictModal(){
+    verdictModal.style.display = "flex";
+  }
+  function closeVerdictModal(){
+    verdictModal.style.display = "none";
+  }
+  verdictModalClose.addEventListener("click", closeVerdictModal);
+  verdictModal.addEventListener("click", e => { if (e.target === verdictModal) closeVerdictModal(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && verdictModal.style.display !== "none") closeVerdictModal();
+  });
+
+  function renderJudgeResultInto(container, r){
+    const score = Math.max(0, Math.min(100, Number(r.score) || 0));
+    const isPass = (r.verdict || "").indexOf("עבר") !== -1 || (r.verdict === "pass");
+    const ringColor = score >= 80 ? "var(--safe)" : score >= 50 ? "var(--warn)" : "var(--danger)";
+    container.innerHTML = `
+      <div class="modal-title">תוצאות השיפוט</div>
+      <div class="verdict-result">
+        <div class="verdict-icon ${isPass ? "pass" : "fail"}">${isPass ? icon("checkCircle", 26) : icon("flag", 26)}</div>
+        <span class="verdict-chip ${isPass ? "pass" : "fail"}">${isPass ? "עמד בנהלים" : "נכשל בנהלים"}</span>
+        <div class="score-wrap">
+          <div class="score-ring" style="--score:${score};--ring-color:${ringColor};"><span>${score}</span></div>
+          <div style="font-size:12.5px;color:var(--text-dim);">ציון בטיחות<br>מתוך 100</div>
+        </div>
+        <div class="reasoning">${escapeHtml(r.reasoning || "")}</div>
+        ${ r.failure_quote ? `<div class="quote-block">"${escapeHtml(r.failure_quote)}"</div>` : "" }
+      </div>
+    `;
+  }
+
+  // Shared by both modes: opens the modal with a loading state, calls the
+  // judge, and renders the result (or an error) into it. Returns the parsed
+  // verdict object, or null if the judge call/parse failed.
+  async function judgeTranscript(transcriptForJudge){
+    verdictModalBody.innerHTML = `
+      <div class="modal-title">שיפוט</div>
+      <div class="modal-loading">
+        <div class="typing"><span></span><span></span><span></span></div>
+        שופט מנתח את השיחה…
+      </div>
+    `;
+    openVerdictModal();
+    const judgeMsgs = [{ role: "user", content: "התמלול לשיפוט:\n" + JSON.stringify(transcriptForJudge, null, 2) }];
+    let raw;
+    try {
+      raw = await callAI(JUDGE_SYSTEM, judgeMsgs);
+    } catch (e) {
+      verdictModalBody.innerHTML = `<div class="empty-state">${icon("alertTriangle", 14)} שגיאה בקריאת השופט</div>`;
+      return null;
+    }
+    let clean = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(clean);
+    } catch (e) {
+      verdictModalBody.innerHTML = `<div class="empty-state">${icon("alertTriangle", 14)} שגיאת פענוח — נסו שוב</div>`;
+      return null;
+    }
+    renderJudgeResultInto(verdictModalBody, parsed);
+    return parsed;
+  }
 
   function renderChatForMode(){
     chatBody.innerHTML = "";
@@ -390,7 +487,15 @@
 
       progressText.textContent = "שופט מנתח…";
       statusDot.classList.add("busy");
-      await runJudge();
+      const transcriptForJudge = autoTranscript.map((t, i) => ({ index: i, speaker: t.speaker, text: t.text }));
+      const parsed = await judgeTranscript(transcriptForJudge);
+      if (parsed) {
+        judgeResult = parsed;
+        progressText.textContent = "השיפוט הושלם";
+        applyFlagToDOM();
+      } else {
+        progressText.innerHTML = icon("alertTriangle", 14) + " השיפוט נכשל";
+      }
     } catch (e) {
       progressText.innerHTML = icon("alertTriangle", 14) + " שגיאה בהרצה — אפשר לנסות שוב";
     } finally {
@@ -401,31 +506,6 @@
       statusDot.classList.remove("busy");
       setPersonaPickerLocked(false);
     }
-  }
-
-  async function runJudge(){
-    const transcriptForJudge = autoTranscript.map((t, i) => ({ index: i, speaker: t.speaker, text: t.text }));
-    const judgeMsgs = [{ role: "user", content: "התמלול לשיפוט:\n" + JSON.stringify(transcriptForJudge, null, 2) }];
-    let raw;
-    try {
-      raw = await callAI(JUDGE_SYSTEM, judgeMsgs);
-    } catch (e) {
-      progressText.innerHTML = icon("alertTriangle", 14) + " שגיאה בקריאת השופט";
-      return;
-    }
-    let clean = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
-    let parsed;
-    try {
-      parsed = JSON.parse(clean);
-    } catch (e) {
-      verdictBody.innerHTML = `<div class="empty-state">${icon("alertTriangle", 14)} שגיאת פענוח — נסו "הרץ שוב"</div>`;
-      progressText.textContent = "שגיאת פענוח";
-      return;
-    }
-    judgeResult = parsed;
-    progressText.textContent = "השיפוט הושלם";
-    renderJudgeResult(parsed);
-    applyFlagToDOM();
   }
 
   function applyFlagToDOM(){
@@ -447,24 +527,6 @@
     el.scrollIntoView({ block: "nearest" });
   }
 
-  function renderJudgeResult(r){
-    const score = Math.max(0, Math.min(100, Number(r.score) || 0));
-    const isPass = (r.verdict || "").indexOf("עבר") !== -1 || (r.verdict === "pass");
-    const ringColor = score >= 80 ? "var(--safe)" : score >= 50 ? "var(--warn)" : "var(--danger)";
-    verdictBody.innerHTML = `
-      <div class="verdict-result">
-        <div class="verdict-icon ${isPass ? "pass" : "fail"}">${isPass ? icon("checkCircle", 26) : icon("flag", 26)}</div>
-        <span class="verdict-chip ${isPass ? "pass" : "fail"}">${isPass ? "עמד בנהלים" : "נכשל בנהלים"}</span>
-        <div class="score-wrap">
-          <div class="score-ring" style="--score:${score};--ring-color:${ringColor};"><span>${score}</span></div>
-          <div style="font-size:12.5px;color:var(--text-dim);">ציון בטיחות<br>מתוך 100</div>
-        </div>
-        <div class="reasoning">${escapeHtml(r.reasoning || "")}</div>
-        ${ r.failure_quote ? `<div class="quote-block">"${escapeHtml(r.failure_quote)}"</div>` : "" }
-      </div>
-    `;
-  }
-
   autoRunBtn.addEventListener("click", runStressTest);
   autoResetBtn.addEventListener("click", () => resetAutoState());
 
@@ -475,7 +537,6 @@
     progressText.textContent = "ממתין";
     autoResetBtn.style.display = "none";
     autoRunBtn.textContent = "▶ הרץ סימולציה";
-    verdictBody.innerHTML = `<div class="empty-state">אין תוצאה עדיין</div>`;
     renderChatForMode();
   }
 
