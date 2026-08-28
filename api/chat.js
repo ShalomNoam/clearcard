@@ -12,7 +12,7 @@
 // official SDK, swap the fetch block below for the @google/genai client
 // (see the commented example at the bottom of this file).
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 module.exports = async function handler(req, res) {
