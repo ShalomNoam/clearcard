@@ -10,11 +10,12 @@
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-// Gemini returns 503 when the model is temporarily overloaded - retry a
-// few times with exponential backoff before giving up, since these spikes
-// usually clear within seconds.
+// Gemini returns 503 when the model is temporarily overloaded and 429 when
+// a rate limit is hit - both are usually transient, so retry a few times
+// with exponential backoff before giving up.
 const MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 500;
+const RETRYABLE_STATUSES = new Set([429, 503]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,7 +27,7 @@ async function fetchGeminiWithRetry(url, options) {
     geminiRes = await fetch(url, options);
     data = await geminiRes.json();
 
-    if (geminiRes.status !== 503 || attempt === MAX_ATTEMPTS) {
+    if (!RETRYABLE_STATUSES.has(geminiRes.status) || attempt === MAX_ATTEMPTS) {
       return { geminiRes, data };
     }
 
@@ -84,10 +85,14 @@ module.exports = async function handler(req, res) {
     });
 
     if (!geminiRes.ok) {
-      const message =
-        geminiRes.status === 503
-          ? "Gemini is currently overloaded and did not recover after retrying. Please try again in a moment."
-          : (data && data.error && data.error.message) || `Gemini API error (${geminiRes.status})`;
+      let message;
+      if (geminiRes.status === 503) {
+        message = "Gemini is currently overloaded and did not recover after retrying. Please try again in a moment.";
+      } else if (geminiRes.status === 429) {
+        message = "Gemini rate limit reached and did not recover after retrying. Please try again in a moment.";
+      } else {
+        message = (data && data.error && data.error.message) || `Gemini API error (${geminiRes.status})`;
+      }
       res.status(geminiRes.status).json({ error: message });
       return;
     }
