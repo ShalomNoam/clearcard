@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // אישור לפניות POST בלבד
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed. Use POST." });
@@ -7,53 +6,63 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "Missing GEMINI_API_KEY environment variable" });
+    return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
   }
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  try {
-    const { messages, system } = req.body || {};
+  const { messages, system } = req.body || {};
 
-    // המרת היסטוריית ההודעות למבנה של Gemini
-    const contents = (messages || []).map((msg) => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content || "" }]
-    }));
+  const contents = (messages || []).map((msg) => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content || "" }]
+  }));
 
-    // בניית גוף הבקשה
-    const payload = {
-      contents: contents.length > 0 ? contents : [{ role: "user", parts: [{ text: "Hello" }] }]
+  const payload = {
+    contents: contents.length > 0 ? contents : [{ role: "user", parts: [{ text: "שלום" }] }]
+  };
+
+  if (system) {
+    payload.systemInstruction = {
+      parts: [{ text: system }]
     };
-
-    if (system) {
-      payload.systemInstruction = {
-        parts: [{ text: system }]
-      };
-    }
-
-    // שליחת הבקשה ל-Gemini API
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Gemini API Error:", data);
-      return res.status(response.status).json({ 
-        error: data.error?.message || "Failed to communicate with Gemini API" 
-      });
-    }
-
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא התקבלה תשובה מהמודל.";
-    return res.status(200).json({ text: replyText });
-
-  } catch (err) {
-    console.error("Server Error:", err);
-    return res.status(500).json({ error: err.message || "Internal server error" });
   }
+
+  // לולאת ניסיונות חוזרים במקרה של עומס 503
+  let lastError = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא התקבלה תשובה מהמודל.";
+        return res.status(200).json({ text: replyText });
+      }
+
+      if (response.status === 503 && attempt < 3) {
+        // המתנה של שנייה לפני ניסיון חוזר
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        continue;
+      }
+
+      return res.status(response.status).json({
+        error: data.error?.message || `API error ${response.status}`
+      });
+    } catch (err) {
+      lastError = err;
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        continue;
+      }
+    }
+  }
+
+  return res.status(500).json({ error: lastError?.message || "Service temporarily unavailable" });
 }
