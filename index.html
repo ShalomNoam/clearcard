@@ -205,13 +205,15 @@
   }
   .msg .tag{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);padding:0 4px;display:flex;align-items:center;gap:6px;}
 
-  /* persona (attacker) styling in auto mode */
+  /* persona (customer) styling in auto mode - amber, not red: this is just
+     the simulated customer talking, not an error/failure state. Red stays
+     reserved for the bot's actual flagged policy failures below. */
   .msg.persona{align-self:flex-end;}
   .msg.persona .bubble{
-    background:var(--danger-bg);color:#991b1b;
+    background:var(--warn-bg);color:#92400e;
     border-start-end-radius:4px;
   }
-  .msg.persona .tag{color:var(--danger);}
+  .msg.persona .tag{color:var(--warn);}
 
   .msg.bot.flagged .bubble{
     background:var(--danger-bg);
