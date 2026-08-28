@@ -37,6 +37,7 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  .ico{display:inline-block;vertical-align:-3px;flex-shrink:0;}
   body{
     position:relative;
     background-color:var(--bg);
@@ -282,8 +283,8 @@
     display:flex;align-items:center;justify-content:center;font-size:26px;
     margin-bottom:10px;
   }
-  .verdict-icon.pass{background:var(--safe-bg);}
-  .verdict-icon.fail{background:var(--danger-bg);}
+  .verdict-icon.pass{background:var(--safe-bg);color:var(--safe);}
+  .verdict-icon.fail{background:var(--danger-bg);color:var(--danger);}
   .score-wrap{display:flex;align-items:center;gap:16px;}
   .score-ring{
     width:78px;height:78px;border-radius:50%;flex-shrink:0;
@@ -315,7 +316,7 @@
   .persona-avatar{
     width:46px;height:46px;border-radius:12px;flex-shrink:0;
     background:linear-gradient(145deg,#e5484d,#a02b30);
-    display:flex;align-items:center;justify-content:center;font-size:20px;
+    display:flex;align-items:center;justify-content:center;color:#fff;
     box-shadow:0 4px 12px rgba(214,54,60,.3);
     filter:saturate(.7) brightness(1.04);
   }
@@ -335,9 +336,9 @@
     opacity:0;transition:opacity .4s ease;
   }
   .persona-card-btn:hover::after{opacity:1;}
-  .pc-top{height:60px;display:flex;align-items:center;justify-content:center;filter:saturate(.58) brightness(1.1);transition:filter .4s ease;}
+  .pc-top{height:60px;display:flex;align-items:center;justify-content:center;color:#fff;filter:saturate(.58) brightness(1.1);transition:filter .4s ease;}
   .persona-card-btn:hover .pc-top{filter:saturate(.8) brightness(1.05);}
-  .pc-emoji{font-size:28px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+  .pc-emoji{display:flex;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));}
   .pc-bottom{padding:9px 10px 11px;}
   .pc-title{font-weight:700;font-size:12.5px;color:var(--text);margin-bottom:2px;}
   .pc-desc{font-size:10.5px;color:var(--text-dim);line-height:1.35;}
@@ -362,9 +363,11 @@
 
   .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
   .chip{
+    display:inline-flex;align-items:center;gap:5px;
     font-size:11.5px;font-family:var(--font-mono);padding:4px 9px;border-radius:999px;
     background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
   }
+  .chip .ico{vertical-align:-2px;}
 
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
@@ -393,8 +396,8 @@
   <div class="mode-switch-wrap enter enter-2">
     <div class="mode-switch" role="group" aria-label="בחירת מצב הפעלה">
       <div class="ms-thumb" id="ms-thumb"></div>
-      <button id="tab-manual" class="ms-btn active" aria-pressed="true">💬 מצב ידני</button>
-      <button id="tab-auto" class="ms-btn" aria-pressed="false">⚡ מצב אוטומטי</button>
+      <button id="tab-manual" class="ms-btn active" aria-pressed="true"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.85 8.38A8.5 8.5 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5Z"/></svg> מצב ידני</button>
+      <button id="tab-auto" class="ms-btn" aria-pressed="false"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg> מצב אוטומטי</button>
     </div>
     <div class="mode-hint" id="mode-hint">מצב ידני: התכתב עם הבוט בעצמך</div>
   </div>
@@ -414,7 +417,7 @@
 
       <div class="chat-body" id="chat-body" role="log" aria-live="polite" aria-label="שיחת הצ'אט">
         <div class="msg bot">
-          <div class="bubble">שלום, כאן קלירקארד 👋 איך אפשר לעזור היום? אפשר לשאול על מסגרת אשראי, כרטיס אבוד או חיובים.</div>
+          <div class="bubble">שלום, כאן קלירקארד. איך אפשר לעזור היום? אפשר לשאול על מסגרת אשראי, כרטיס אבוד או חיובים.</div>
         </div>
       </div>
 
@@ -446,9 +449,9 @@
         <div class="side-head">מדיניות הבוט</div>
         <div class="side-body">
           <div class="chip-row">
-            <span class="chip">🔒 אימות זהות חובה</span>
-            <span class="chip">🚫 ללא חריגת מסגרת</span>
-            <span class="chip">🤖 Gemini AI</span>
+            <span class="chip"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> אימות זהות חובה</span>
+            <span class="chip"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/></svg> ללא חריגת מסגרת</span>
+            <span class="chip"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg> Gemini AI</span>
           </div>
         </div>
       </div>
@@ -457,7 +460,7 @@
       <div class="panel enter enter-5">
         <div class="side-head">פרסונה</div>
         <div class="side-body persona-section">
-          <div class="persona-disabled-banner" id="persona-disabled-banner">🔒 זמין במצב אוטומטי בלבד</div>
+          <div class="persona-disabled-banner" id="persona-disabled-banner"><svg class="ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> זמין במצב אוטומטי בלבד</div>
           <div class="persona-fade-target" id="persona-fade-target">
             <div class="persona-grid" id="persona-picker"></div>
             <div class="persona-card" id="persona-detail" style="margin-top:14px;"></div>
