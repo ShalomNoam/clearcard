@@ -415,6 +415,29 @@
   }
   .chip .ico{vertical-align:-2px;}
 
+  /* ---------- mobile / tablet ---------- */
+  /* Below the point where the grid stacks to one column, the strict
+     viewport-lock (built for the two-column desktop layout) stops making
+     sense - a phone doesn't have room for chat + persona picker + policy
+     all inside one screen height. Drop it and let the page scroll normally,
+     which is what people actually expect on mobile. */
+  @media (max-width:900px){
+    html,body{height:auto;}
+    body{height:auto;overflow-y:visible;display:block;}
+    .wrap{flex:none;min-height:0;display:block;padding:20px 16px 28px;}
+    header.top{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:14px;}
+    .mode-switch-wrap{margin-bottom:20px;}
+    .mode-switch{min-width:0;width:100%;max-width:360px;}
+    .grid{flex:none;min-height:0;}
+    .main-panel{height:auto;}
+    .chat-body{flex:none;height:58vh;min-height:280px;}
+    .side{height:auto;overflow-y:visible;}
+    .chat-head{flex-wrap:wrap;row-gap:10px;}
+    #manual-finish{white-space:nowrap;}
+    .persona-grid{gap:8px;}
+    footer{margin-top:28px;}
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
   }
