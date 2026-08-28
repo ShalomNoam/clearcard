@@ -1,68 +1,121 @@
-export default async function handler(req, res) {
+// api/chat.js
+// Vercel Serverless Function (Node.js runtime).
+// Proxies chat requests from the frontend to Google Gemini, so the
+// GEMINI_API_KEY never has to be exposed in client-side code.
+//
+// Frontend sends:  { system: "<system prompt>", messages: [{role:'user'|'assistant', content:'...'}] }
+// This function returns: { text: "<model reply>" }  on success
+//                          { error: "<message>" }     on failure
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// Gemini returns 503 when the model is temporarily overloaded - retry a
+// few times with exponential backoff before giving up, since these spikes
+// usually clear within seconds.
+const MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchGeminiWithRetry(url, options) {
+  let geminiRes, data;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    geminiRes = await fetch(url, options);
+    data = await geminiRes.json();
+
+    if (geminiRes.status !== 503 || attempt === MAX_ATTEMPTS) {
+      return { geminiRes, data };
+    }
+
+    await sleep(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+  }
+
+  return { geminiRes, data };
+}
+
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "Method not allowed. Use POST." });
+    res.status(405).json({ error: "Method not allowed. Use POST." });
+    return;
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "Missing GEMINI_API_KEY" });
+    res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server (Vercel > Settings > Environment Variables)." });
+    return;
   }
 
-  // שימוש בגרסת v1 היציבה עבור 1.5-flash
-  const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+  const { system, messages } = req.body || {};
 
-  const { messages, system } = req.body || {};
+  if (!Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({ error: "'messages' array is required." });
+    return;
+  }
 
-  const contents = (messages || []).map((msg) => ({
-    role: msg.role === "assistant" ? "model" : "user",
-    parts: [{ text: msg.content || "" }]
+  // Translate the Anthropic-style {role:'user'|'assistant', content} shape
+  // the frontend already uses into Gemini's {role:'user'|'model', parts:[{text}]} shape.
+  const contents = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: String(m.content || "") }],
   }));
 
-  const payload = {
-    contents: contents.length > 0 ? contents : [{ role: "user", parts: [{ text: "שלום" }] }]
+  const body = {
+    contents,
+    generationConfig: { maxOutputTokens: 1000 },
   };
-
   if (system) {
-    payload.systemInstruction = {
-      parts: [{ text: system }]
-    };
+    body.systemInstruction = { parts: [{ text: system }] };
   }
 
-  let lastError = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  try {
+    // API key goes in the header, not the URL - a query-string key can end
+    // up captured in Vercel's own request/observability logs.
+    const { geminiRes, data } = await fetchGeminiWithRetry(GEMINI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "לא התקבלה תשובה מהמודל.";
-        return res.status(200).json({ text: replyText });
-      }
-
-      if (response.status === 503 && attempt < 3) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-        continue;
-      }
-
-      console.error("Gemini Error:", data);
-      return res.status(response.status).json({
-        error: data.error?.message || `API error ${response.status}`
-      });
-    } catch (err) {
-      lastError = err;
-      if (attempt < 3) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-        continue;
-      }
+    if (!geminiRes.ok) {
+      const message =
+        geminiRes.status === 503
+          ? "Gemini is currently overloaded and did not recover after retrying. Please try again in a moment."
+          : (data && data.error && data.error.message) || `Gemini API error (${geminiRes.status})`;
+      res.status(geminiRes.status).json({ error: message });
+      return;
     }
-  }
 
-  return res.status(500).json({ error: lastError?.message || "Internal server error" });
-}
+    const candidate = data.candidates && data.candidates[0];
+
+    if (!candidate) {
+      res.status(502).json({ error: "No response candidate returned by Gemini." });
+      return;
+    }
+
+    // Gemini blocks some responses on safety/recitation grounds instead of
+    // erroring - surface that distinctly so the frontend can show something
+    // sensible instead of crashing on an empty string.
+    if (candidate.finishReason === "SAFETY" || candidate.finishReason === "RECITATION") {
+      res.status(200).json({ text: "", blocked: true, reason: candidate.finishReason });
+      return;
+    }
+
+    const text =
+      (candidate.content &&
+        candidate.content.parts &&
+        candidate.content.parts.map((p) => p.text || "").join("")) ||
+      "";
+
+    res.status(200).json({ text });
+  } catch (err) {
+    console.error("Gemini request failed:", err);
+    res.status(500).json({ error: "Failed to reach Gemini API." });
+  }
+};
