@@ -46,7 +46,13 @@
   body{
     position:relative;
     background-color:var(--bg);
-    background-image:radial-gradient(1000px 480px at 50% -14%, rgba(14,165,233,.06), transparent 60%);
+    background-image:
+      radial-gradient(900px 620px at 6% -8%, rgba(14,165,233,.13), transparent 60%),
+      radial-gradient(760px 560px at 100% 6%, rgba(56,189,248,.10), transparent 58%),
+      radial-gradient(680px 520px at 92% 96%, rgba(22,163,74,.07), transparent 55%),
+      radial-gradient(620px 480px at 4% 92%, rgba(217,119,6,.06), transparent 55%),
+      linear-gradient(180deg, #fbfdff 0%, var(--bg) 40%, #f5f8fb 100%);
+    background-attachment:fixed;
     color:var(--text);
     font-family:var(--font-body);
     line-height:1.6;
