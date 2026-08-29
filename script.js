@@ -211,7 +211,7 @@
     auto: "מצב אוטומטי: תן ל-AI לבחון את הבוט"
   };
 
-  let mode = "manual";
+  let mode = "auto";
 
   function moveThumb(){
     const activeBtn = mode === "manual" ? tabManual : tabAuto;
@@ -589,5 +589,5 @@
   }
 
   renderPersonaPicker();
-  setMode("manual");
+  setMode("auto");
 })();

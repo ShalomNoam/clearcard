@@ -465,10 +465,10 @@
   <div class="mode-switch-wrap enter enter-2">
     <div class="mode-switch" role="group" aria-label="בחירת מצב הפעלה">
       <div class="ms-thumb" id="ms-thumb"></div>
-      <button id="tab-manual" class="ms-btn active" aria-pressed="true"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.85 8.38A8.5 8.5 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5Z"/></svg> מצב ידני</button>
-      <button id="tab-auto" class="ms-btn" aria-pressed="false"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg> מצב אוטומטי</button>
+      <button id="tab-manual" class="ms-btn" aria-pressed="false"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.85 8.38A8.5 8.5 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5Z"/></svg> מצב ידני</button>
+      <button id="tab-auto" class="ms-btn active" aria-pressed="true"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg> מצב אוטומטי</button>
     </div>
-    <div class="mode-hint" id="mode-hint">מצב ידני: התכתב עם הבוט בעצמך</div>
+    <div class="mode-hint" id="mode-hint">מצב אוטומטי: תן ל-AI לבחון את הבוט</div>
   </div>
 
   <div class="grid">
@@ -482,19 +482,17 @@
             <div class="sub"><span class="status-dot" id="status-dot"></span><span id="status-text">מחובר</span></div>
           </div>
         </div>
-        <button class="btn ghost sm" id="manual-finish" type="button" disabled>
+        <button class="btn ghost sm" id="manual-finish" type="button" disabled style="display:none;">
           <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h14l-3 4 3 4H5"/></svg> סיום ושיפוט
         </button>
       </div>
 
       <div class="chat-body" id="chat-body" role="log" aria-live="polite" aria-label="שיחת הצ'אט">
-        <div class="msg bot">
-          <div class="bubble">שלום, כאן קלירקארד. איך אפשר לעזור היום? אפשר לשאול על מסגרת אשראי, כרטיס אבוד או חיובים.</div>
-        </div>
+        <div class="empty-state" style="margin:auto;">בחרו פרסונה והריצו סימולציה</div>
       </div>
 
       <!-- manual controls -->
-      <div class="input-row" id="manual-controls">
+      <div class="input-row" id="manual-controls" style="display:none;">
         <input id="manual-input" type="text" placeholder="כתוב הודעה לבוט של קלירקארד…" autocomplete="off">
         <button class="fab" id="manual-send" aria-label="שלח">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -502,7 +500,7 @@
       </div>
 
       <!-- auto controls -->
-      <div class="auto-controls" id="auto-controls" style="display:none;">
+      <div class="auto-controls" id="auto-controls">
         <div class="progress-wrap">
           <div class="progress-label"><span id="progress-text">ממתין</span><span id="progress-count">סבב 0 / 4</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
