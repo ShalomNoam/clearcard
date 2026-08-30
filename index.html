@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ClearCard — דמו חי: קלירקארד Stress Test</title>
+<script>try{if(localStorage.getItem('clearcard_lang')==='en'){var d=document.documentElement;d.setAttribute('dir','ltr');d.setAttribute('lang','en');}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -413,7 +414,7 @@
   @media (max-width:900px){
     html,body{height:auto;}
     body{height:auto;overflow-y:visible;display:block;}
-    .wrap{flex:none;min-height:0;display:block;padding:20px 16px 28px;}
+    .wrap{flex:none;min-height:0;display:block;padding:52px 16px 28px;}
     header.top{flex-direction:column;align-items:flex-end;gap:12px;margin-bottom:14px;}
     .mode-switch-wrap{margin-bottom:20px;}
     .mode-switch{min-width:0;width:100%;max-width:360px;}
@@ -429,9 +430,32 @@
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
   }
+
+  /* ---------- language switch ---------- */
+  .lang-switch{
+    position:fixed;top:16px;inset-inline-start:20px;z-index:70;
+    display:inline-flex;gap:3px;padding:4px;border-radius:999px;
+    background:var(--panel);box-shadow:var(--shadow-card);
+  }
+  .lang-switch button{
+    appearance:none;border:0;cursor:pointer;background:transparent;
+    font-family:var(--font-body);font-size:12.5px;font-weight:600;line-height:1;
+    color:var(--text-dim);padding:6px 13px;border-radius:999px;
+    transition:background .2s ease,color .2s ease;
+  }
+  .lang-switch button.active{background:var(--brand);color:#fff;}
+  .lang-switch button:not(.active):hover{color:var(--text);}
+  @media (max-width:900px){
+    .lang-switch{top:12px;inset-inline-start:14px;}
+    .lang-switch button{padding:5px 11px;font-size:12px;}
+  }
 </style>
 </head>
 <body>
+<div class="lang-switch" role="group" aria-label="Language / שפה">
+  <button id="lang-he" type="button" lang="he">עב</button>
+  <button id="lang-en" type="button" lang="en">EN</button>
+</div>
 <div class="wrap">
 
   <header class="top enter enter-1">
@@ -450,12 +474,12 @@
   </header>
 
   <div class="mode-switch-wrap enter enter-2">
-    <div class="mode-switch" role="group" aria-label="בחירת מצב הפעלה">
+    <div class="mode-switch" role="group" data-i18n-aria="modeAria" aria-label="בחירת מצב הפעלה">
       <div class="ms-thumb" id="ms-thumb"></div>
-      <button id="tab-manual" class="ms-btn" aria-pressed="false"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.85 8.38A8.5 8.5 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5Z"/></svg> מצב ידני</button>
-      <button id="tab-auto" class="ms-btn active" aria-pressed="true"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg> מצב אוטומטי</button>
+      <button id="tab-manual" class="ms-btn" aria-pressed="false"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-8.85 8.38A8.5 8.5 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5Z"/></svg> <span data-i18n="tabManual">מצב ידני</span></button>
+      <button id="tab-auto" class="ms-btn active" aria-pressed="true"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2"/></svg> <span data-i18n="tabAuto">מצב אוטומטי</span></button>
     </div>
-    <div class="mode-hint" id="mode-hint">מצב אוטומטי: תן ל-AI לבחון את הבוט</div>
+    <div class="mode-hint" id="mode-hint" data-i18n="hintAuto">מצב אוטומטי: תן ל-AI לבחון את הבוט</div>
   </div>
 
   <div class="grid">
@@ -465,23 +489,23 @@
         <div class="who">
           <div class="chat-avatar">CC</div>
           <div>
-            <div class="name">קלירקארד · עוזר וירטואלי</div>
-            <div class="sub"><span class="status-dot" id="status-dot"></span><span id="status-text">מחובר</span></div>
+            <div class="name" data-i18n="chatName">קלירקארד · עוזר וירטואלי</div>
+            <div class="sub"><span class="status-dot" id="status-dot"></span><span id="status-text" data-i18n="statusOnline">מחובר</span></div>
           </div>
         </div>
         <button class="btn ghost sm" id="manual-finish" type="button" disabled style="display:none;">
-          <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h14l-3 4 3 4H5"/></svg> סיום ושיפוט
+          <svg class="ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h14l-3 4 3 4H5"/></svg> <span data-i18n="finishBtn">סיום ושיפוט</span>
         </button>
       </div>
 
-      <div class="chat-body" id="chat-body" role="log" aria-live="polite" aria-label="שיחת הצ'אט">
-        <div class="empty-state" style="margin:auto;">בחרו פרסונה והריצו סימולציה</div>
+      <div class="chat-body" id="chat-body" role="log" aria-live="polite" data-i18n-aria="chatAria" aria-label="שיחת הצ'אט">
+        <div class="empty-state" style="margin:auto;" data-i18n="emptyState">בחרו פרסונה והריצו סימולציה</div>
       </div>
 
       <!-- manual controls -->
       <div class="input-row" id="manual-controls" style="display:none;">
-        <input id="manual-input" type="text" placeholder="כתוב הודעה לבוט של קלירקארד…" autocomplete="off">
-        <button class="fab" id="manual-send" aria-label="שלח">
+        <input id="manual-input" type="text" data-i18n-ph="inputPh" placeholder="כתוב הודעה לבוט של קלירקארד…" autocomplete="off">
+        <button class="fab" id="manual-send" data-i18n-aria="sendAria" aria-label="שלח">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
@@ -489,12 +513,12 @@
       <!-- auto controls -->
       <div class="auto-controls" id="auto-controls">
         <div class="progress-wrap">
-          <div class="progress-label"><span id="progress-text">ממתין</span><span id="progress-count">סבב 0 / 4</span></div>
+          <div class="progress-label"><span id="progress-text" data-i18n="idle">ממתין</span><span id="progress-count">סבב 0 / 4</span></div>
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn ghost" id="auto-reset" style="display:none;">איפוס</button>
-          <button class="btn" id="auto-run">▶ הרץ סימולציה</button>
+          <button class="btn ghost" id="auto-reset" style="display:none;" data-i18n="reset">איפוס</button>
+          <button class="btn" id="auto-run" data-i18n="runSim">▶ הרץ סימולציה</button>
         </div>
       </div>
     </div>
@@ -503,11 +527,11 @@
     <div class="side">
       <!-- bot policy (always visible) -->
       <div class="panel enter enter-4">
-        <div class="side-head">מדיניות הבוט</div>
+        <div class="side-head" data-i18n="policyHead">מדיניות הבוט</div>
         <div class="side-body">
           <div class="chip-row">
-            <span class="chip"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> אימות זהות חובה</span>
-            <span class="chip"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/></svg> ללא חריגת מסגרת</span>
+            <span class="chip"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span data-i18n="chipVerify">אימות זהות חובה</span></span>
+            <span class="chip"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="5.5" y1="5.5" x2="18.5" y2="18.5"/></svg> <span data-i18n="chipNoBreach">ללא חריגת מסגרת</span></span>
             <span class="chip"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg> Gemini AI</span>
           </div>
         </div>
@@ -515,9 +539,9 @@
 
       <!-- persona picker (always visible, faded/disabled in manual mode) -->
       <div class="panel enter enter-5">
-        <div class="side-head">פרסונה</div>
+        <div class="side-head" data-i18n="personaHead">פרסונה</div>
         <div class="side-body persona-section">
-          <div class="persona-disabled-banner" id="persona-disabled-banner"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> זמין במצב אוטומטי בלבד</div>
+          <div class="persona-disabled-banner" id="persona-disabled-banner"><svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span data-i18n="personaDisabled">זמין במצב אוטומטי בלבד</span></div>
           <div class="persona-fade-target" id="persona-fade-target">
             <div class="persona-grid" id="persona-picker"></div>
             <div class="persona-card" id="persona-detail" style="margin-top:10px;"></div>
@@ -532,9 +556,9 @@
 
 <!-- judge results popup - shown on demand after an auto simulation
      finishes, or when "סיום ושיפוט" is clicked in manual mode -->
-<div class="modal-overlay" id="verdict-modal" role="dialog" aria-modal="true" aria-label="תוצאות השיפוט" style="display:none;">
+<div class="modal-overlay" id="verdict-modal" role="dialog" aria-modal="true" data-i18n-aria="verdictAria" aria-label="תוצאות השיפוט" style="display:none;">
   <div class="modal-card">
-    <button class="modal-close" id="verdict-modal-close" type="button" aria-label="סגור">
+    <button class="modal-close" id="verdict-modal-close" type="button" data-i18n-aria="closeAria" aria-label="סגור">
       <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
     </button>
     <div id="verdict-modal-body"></div>
