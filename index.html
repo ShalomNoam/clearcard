@@ -13,30 +13,30 @@
     /* ---- Premium Clean Light FinTech: soft off-white canvas, pure-white
        cards lifted with delicate shadows (no hard borders), one vibrant sky
        accent, deep-slate (never pure black) text. Stripe/Vercel inspired. ---- */
-    --bg:#f8fafc;
-    --bg-soft:#f1f5f9;
+    --bg:#f2f3f9;
+    --bg-soft:#ebecf5;
     --panel:#ffffff;
-    --panel-2:#f1f5f9;
-    --line:#eef2f7;
-    --line-soft:#f1f5f9;
-    --text:#0f172a;
-    --text-dim:#475569;
-    --text-faint:#94a3b8;
-    --brand:#0ea5e9;
-    --brand-2:#38bdf8;
-    --brand-deep:#0284c7;
-    --brand-dim:#e0f2fe;
-    --safe:#16a34a;
-    --safe-bg:#f0fdf4;
-    --warn:#d97706;
-    --warn-bg:#fffbeb;
-    --danger:#dc2626;
-    --danger-bg:#fef2f2;
+    --panel-2:#f1f2f9;
+    --line:#e6e6f2;
+    --line-soft:#eef0f7;
+    --text:#12162a;
+    --text-dim:#454e66;
+    --text-faint:#6b7386;
+    --brand:#8a93f0;
+    --brand-2:#a7adf5;
+    --brand-deep:#6b74d6;
+    --brand-dim:#e9ebfd;
+    --safe:#1e9e82;
+    --safe-bg:#e3faf3;
+    --warn:#b5790a;
+    --warn-bg:#fdf1de;
+    --danger:#d6363c;
+    --danger-bg:#fdeaeb;
     --radius:16px;
     --radius-sm:14px;
     --ease-out:cubic-bezier(.16,1,.3,1);
-    --shadow-card:0 4px 12px rgba(15,23,42,.04);
-    --shadow-lift:0 10px 24px rgba(15,23,42,.07);
+    --shadow-card:0 4px 12px rgba(18,22,42,.04);
+    --shadow-lift:0 10px 24px rgba(18,22,42,.07);
     --font-display:'Heebo', sans-serif;
     --font-body:'Heebo', -apple-system, 'Segoe UI', sans-serif;
     --font-mono:'IBM Plex Mono', monospace;
@@ -48,11 +48,11 @@
     position:relative;
     background-color:var(--bg);
     background-image:
-      radial-gradient(900px 620px at 6% -8%, rgba(14,165,233,.13), transparent 60%),
-      radial-gradient(760px 560px at 100% 6%, rgba(56,189,248,.10), transparent 58%),
-      radial-gradient(680px 520px at 92% 96%, rgba(22,163,74,.07), transparent 55%),
-      radial-gradient(620px 480px at 4% 92%, rgba(217,119,6,.06), transparent 55%),
-      linear-gradient(180deg, #fbfdff 0%, var(--bg) 40%, #f5f8fb 100%);
+      radial-gradient(900px 620px at 6% -8%, rgba(138,147,240,.13), transparent 60%),
+      radial-gradient(760px 560px at 100% 6%, rgba(167,173,245,.10), transparent 58%),
+      radial-gradient(680px 520px at 92% 96%, rgba(194,245,233,.16), transparent 55%),
+      radial-gradient(620px 480px at 4% 92%, rgba(255,212,194,.16), transparent 55%),
+      linear-gradient(180deg, #fbfbfe 0%, var(--bg) 40%, #ebecf5 100%);
     background-attachment:fixed;
     color:var(--text);
     font-family:var(--font-body);
@@ -66,7 +66,7 @@
   ::selection{background:var(--brand);color:#fff;}
   :focus-visible{
     outline:2px solid var(--brand);outline-offset:2px;border-radius:6px;
-    box-shadow:0 0 0 4px rgba(14,165,233,.18);
+    box-shadow:0 0 0 4px rgba(138,147,240,.18);
   }
 
   /* The whole app is locked to one viewport-height column: header and mode
@@ -121,7 +121,7 @@
   .ms-thumb{
     position:absolute;top:5px;bottom:5px;left:0;border-radius:999px;
     background:var(--brand);
-    box-shadow:0 6px 16px rgba(14,165,233,.35);
+    box-shadow:0 6px 16px rgba(138,147,240,.35);
     transition:left .45s var(--ease-out), width .45s var(--ease-out);
     z-index:0;
   }
@@ -194,7 +194,7 @@
   .msg.user .bubble{
     background:var(--brand);color:#fff;
     border-start-end-radius:4px;
-    box-shadow:0 6px 16px rgba(14,165,233,.25);
+    box-shadow:0 6px 16px rgba(138,147,240,.25);
   }
   .msg .tag{font-size:11px;color:var(--text-faint);font-family:var(--font-mono);padding:0 4px;display:flex;align-items:center;gap:6px;}
 
@@ -240,10 +240,10 @@
     appearance:none;border:none;cursor:pointer;border-radius:var(--radius-sm);
     padding:13px 22px;font-family:var(--font-body);font-weight:600;font-size:14px;
     background:var(--brand);color:#fff;
-    box-shadow:0 4px 14px rgba(14,165,233,.3);
+    box-shadow:0 4px 14px rgba(138,147,240,.3);
     transition:box-shadow .25s var(--ease-out), transform .2s var(--ease-out), filter .15s ease, opacity .2s ease;
   }
-  .btn:hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 10px 22px rgba(14,165,233,.36);}
+  .btn:hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 10px 22px rgba(138,147,240,.36);}
   .btn:active{transform:translateY(0) scale(.98);}
   .btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none;}
   .btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--text-dim);box-shadow:none;}
@@ -258,11 +258,11 @@
     width:48px;height:48px;border-radius:50%;
     background:var(--brand);color:#fff;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 16px rgba(14,165,233,.35);
+    box-shadow:0 6px 16px rgba(138,147,240,.35);
     transition:box-shadow .25s var(--ease-out), transform .2s var(--ease-out), filter .15s ease, opacity .2s ease;
   }
   .fab svg{width:19px;height:19px;transform:scaleX(-1);}
-  .fab:hover{filter:brightness(1.05);transform:translateY(-2px) scale(1.05);box-shadow:0 10px 22px rgba(14,165,233,.42);}
+  .fab:hover{filter:brightness(1.05);transform:translateY(-2px) scale(1.05);box-shadow:0 10px 22px rgba(138,147,240,.42);}
   .fab:active{transform:translateY(0) scale(.96);}
   .fab:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none;}
 
@@ -325,7 +325,7 @@
   /* ---------- judge results modal ---------- */
   .modal-overlay{
     position:fixed;inset:0;z-index:60;
-    background:rgba(15,23,42,.5);
+    background:rgba(18,22,42,.5);
     display:flex;align-items:center;justify-content:center;
     padding:24px;
     animation:overlayIn .2s ease both;
@@ -443,7 +443,7 @@
   .lang-thumb{
     position:absolute;top:5px;bottom:5px;left:5px;width:0;
     border-radius:999px;background:var(--brand);
-    box-shadow:0 6px 16px rgba(14,165,233,.35);z-index:0;
+    box-shadow:0 6px 16px rgba(138,147,240,.35);z-index:0;
     transition:left .35s var(--ease-out),width .35s var(--ease-out);
   }
   .lang-switch button{
@@ -472,10 +472,10 @@
   <header class="top enter enter-1">
     <div class="brand">
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-        <circle cx="20" cy="20" r="18" stroke="#0ea5e9" stroke-width="2" opacity="0.5"/>
-        <circle cx="20" cy="20" r="11" stroke="#0ea5e9" stroke-width="2"/>
-        <path d="M20 9 L20 2 M20 38 L20 31 M9 20 L2 20 M38 20 L31 20" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="20" cy="20" r="3.5" fill="#0f172a"/>
+        <circle cx="20" cy="20" r="18" stroke="#8a93f0" stroke-width="2" opacity="0.5"/>
+        <circle cx="20" cy="20" r="11" stroke="#8a93f0" stroke-width="2"/>
+        <path d="M20 9 L20 2 M20 38 L20 31 M9 20 L2 20 M38 20 L31 20" stroke="#8a93f0" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="3.5" fill="#12162a"/>
       </svg>
       <div class="brand-text">
         <h1>ClearCard</h1>
