@@ -836,6 +836,16 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
       heBtn.setAttribute("aria-pressed", LANG === "he");
       enBtn.setAttribute("aria-pressed", LANG === "en");
     }
+    moveLangThumb();
+  }
+
+  // Slide the coloured pill under the active label; the עב / EN labels stay put.
+  function moveLangThumb(){
+    const thumb = document.querySelector(".lang-thumb");
+    const active = document.getElementById(LANG === "he" ? "lang-he" : "lang-en");
+    if (!thumb || !active) return;
+    thumb.style.left = active.offsetLeft + "px";
+    thumb.style.width = active.offsetWidth + "px";
   }
 
   function setLang(l){
@@ -865,12 +875,26 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
   }
 
   // ---------- INIT ----------
+  // First pill placement must not animate from its default spot.
+  const langThumbEl = document.querySelector(".lang-thumb");
+  if (langThumbEl) langThumbEl.style.transition = "none";
+
   applyI18n();
   setProgress(0);
   progressText.textContent = t("idle");
   autoRunBtn.textContent = t("runSim");
   renderPersonaPicker();
   setMode("auto");
+
+  // Reveal content the head-cloak hid to prevent a Hebrew flash for EN visitors.
+  const i18nCloak = document.getElementById("i18n-cloak");
+  if (i18nCloak && i18nCloak.parentNode) i18nCloak.parentNode.removeChild(i18nCloak);
+
+  if (langThumbEl) {
+    requestAnimationFrame(() => { langThumbEl.style.transition = ""; });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveLangThumb);
+  }
+  window.addEventListener("resize", moveLangThumb);
 
   const heBtnEl = document.getElementById("lang-he");
   const enBtnEl = document.getElementById("lang-en");

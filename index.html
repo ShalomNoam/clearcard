@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ClearCard — דמו חי: קלירקארד Stress Test</title>
-<script>try{if(localStorage.getItem('clearcard_lang')==='en'){var d=document.documentElement;d.setAttribute('dir','ltr');d.setAttribute('lang','en');}}catch(e){}</script>
+<script>try{if(localStorage.getItem('clearcard_lang')==='en'){var d=document.documentElement;d.setAttribute('dir','ltr');d.setAttribute('lang','en');var s=document.createElement('style');s.id='i18n-cloak';s.textContent='[data-i18n]{visibility:hidden}';(document.head||d).appendChild(s);setTimeout(function(){var c=document.getElementById('i18n-cloak');if(c&&c.parentNode)c.parentNode.removeChild(c);},1500);}}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -433,28 +433,37 @@
   }
 
   /* ---------- language switch ---------- */
-  /* fixed at the physical top-left, in both languages — never shifts side to side */
+  /* fixed at the physical top-left in both languages; direction:ltr keeps the
+     עב / EN labels in a fixed order — only the coloured pill slides. */
   .lang-switch{
-    position:fixed;top:16px;left:20px;z-index:70;
-    display:inline-flex;gap:3px;padding:4px;border-radius:999px;
+    position:fixed;top:16px;left:20px;z-index:70;direction:ltr;
+    display:inline-flex;gap:3px;padding:5px;border-radius:999px;
     background:var(--panel);box-shadow:var(--shadow-card);
   }
-  .lang-switch button{
-    appearance:none;border:0;cursor:pointer;background:transparent;
-    font-family:var(--font-body);font-size:12.5px;font-weight:600;line-height:1;
-    color:var(--text-dim);padding:6px 13px;border-radius:999px;
-    transition:background .2s ease,color .2s ease;
+  .lang-thumb{
+    position:absolute;top:5px;bottom:5px;left:5px;width:0;
+    border-radius:999px;background:var(--brand);
+    box-shadow:0 6px 16px rgba(14,165,233,.35);z-index:0;
+    transition:left .35s var(--ease-out),width .35s var(--ease-out);
   }
-  .lang-switch button.active{background:var(--brand);color:#fff;}
+  .lang-switch button{
+    position:relative;z-index:1;
+    appearance:none;border:0;cursor:pointer;background:transparent;
+    font-family:var(--font-body);font-size:13.5px;font-weight:600;line-height:1;
+    color:var(--text-dim);padding:8px 15px;border-radius:999px;
+    transition:color .2s ease;
+  }
+  .lang-switch button.active{color:#fff;}
   .lang-switch button:not(.active):hover{color:var(--text);}
   @media (max-width:900px){
     .lang-switch{top:12px;left:14px;}
-    .lang-switch button{padding:5px 11px;font-size:12px;}
+    .lang-switch button{padding:7px 13px;font-size:12.5px;}
   }
 </style>
 </head>
 <body>
 <div class="lang-switch" role="group" aria-label="Language / שפה">
+  <span class="lang-thumb" aria-hidden="true"></span>
   <button id="lang-he" type="button" lang="he">עב</button>
   <button id="lang-en" type="button" lang="en">EN</button>
 </div>
