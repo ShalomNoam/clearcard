@@ -458,20 +458,28 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
   let manualHistory = []; // {role:'user'|'assistant', content}
   let manualBusy = false;
 
+  // Keep the log pinned to the newest message only when the reader is already
+  // near the bottom. If they've scrolled up to re-read something, a new bubble
+  // (or the typing dots) must not yank them back down.
+  function chatIsNearBottom(){
+    return chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 140;
+  }
   function renderManualBubble(role, text, opts){
+    const stick = role === "user" || chatIsNearBottom();
     const div = document.createElement("div");
     div.className = "msg " + (role === "user" ? "user" : "bot");
     const prefix = (opts && opts.icon) ? icon(opts.icon, 15) + " " : "";
     div.innerHTML = `<div class="bubble">${prefix}${escapeHtml(text)}</div>`;
     chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight;
+    if (stick) chatBody.scrollTop = chatBody.scrollHeight;
   }
   function renderTyping(){
+    const stick = chatIsNearBottom();
     const div = document.createElement("div");
     div.className = "typing-wrap";
     div.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
     chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight;
+    if (stick) chatBody.scrollTop = chatBody.scrollHeight;
     return div;
   }
 
@@ -508,7 +516,7 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
       manualSend.disabled = false;
       statusDot.classList.remove("busy");
       statusText.textContent = t("statusOnline");
-      manualInput.focus();
+      manualInput.focus({ preventScroll: true });
       updateManualFinishState();
     }
   }
