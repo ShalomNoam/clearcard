@@ -95,7 +95,8 @@
 
   /* ---------- header ---------- */
   header.top{flex-shrink:0;display:flex;align-items:flex-start;justify-content:flex-end;gap:28px;flex-wrap:wrap;margin-bottom:10px;}
-  .brand{display:flex;align-items:center;gap:16px;}
+  /* keep the brand on the physical right in both languages, clear of the fixed top-left language switch */
+  .brand{display:flex;align-items:center;gap:16px;margin-left:auto;}
   .brand svg{flex-shrink:0;width:34px;height:34px;}
   .brand-text h1{
     font-family:var(--font-display);
@@ -414,7 +415,7 @@
   @media (max-width:900px){
     html,body{height:auto;}
     body{height:auto;overflow-y:visible;display:block;}
-    .wrap{flex:none;min-height:0;display:block;padding:52px 16px 28px;}
+    .wrap{flex:none;min-height:0;display:block;padding:24px 16px 28px;}
     header.top{flex-direction:column;align-items:flex-end;gap:12px;margin-bottom:14px;}
     .mode-switch-wrap{margin-bottom:20px;}
     .mode-switch{min-width:0;width:100%;max-width:360px;}
@@ -432,8 +433,9 @@
   }
 
   /* ---------- language switch ---------- */
+  /* fixed at the physical top-left, in both languages — never shifts side to side */
   .lang-switch{
-    position:fixed;top:16px;inset-inline-start:20px;z-index:70;
+    position:fixed;top:16px;left:20px;z-index:70;
     display:inline-flex;gap:3px;padding:4px;border-radius:999px;
     background:var(--panel);box-shadow:var(--shadow-card);
   }
@@ -446,7 +448,7 @@
   .lang-switch button.active{background:var(--brand);color:#fff;}
   .lang-switch button:not(.active):hover{color:var(--text);}
   @media (max-width:900px){
-    .lang-switch{top:12px;inset-inline-start:14px;}
+    .lang-switch{top:12px;left:14px;}
     .lang-switch button{padding:5px 11px;font-size:12px;}
   }
 </style>
