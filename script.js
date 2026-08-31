@@ -434,6 +434,45 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
     msThumb.style.width = activeBtn.offsetWidth + "px";
   }
 
+  // ---------- MOBILE: keep the composer above the on-screen keyboard ----------
+  // On phones the chat panel is sized to the *visible* viewport, so the input
+  // row sits on the bottom edge of the screen and tapping it doesn't push the
+  // conversation out of view. Pure layout - touches no state / API / retry.
+  const mainPanelEl = document.querySelector(".main-panel");
+  let panelDocTop = null;   // panel's distance from the top of the document (stable)
+  function isMobileLayout(){
+    return window.matchMedia("(max-width:900px)").matches;
+  }
+  function measurePanelTop(){
+    if (!mainPanelEl || !isMobileLayout()) return;
+    panelDocTop = mainPanelEl.getBoundingClientRect().top + window.scrollY;
+  }
+  function fitChatPanel(){
+    if (!mainPanelEl) return;
+    if (!isMobileLayout()){
+      if (mainPanelEl.style.height) mainPanelEl.style.height = "";
+      panelDocTop = null;
+      return;
+    }
+    if (panelDocTop == null) measurePanelTop();
+    const viewH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    const wasNearBottom =
+      chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 140;
+    // Panel bottom meets the bottom of the visible viewport (keyboard-aware).
+    // Anchored to the document, so document scrolling never resizes the panel.
+    const h = Math.max(200, Math.round(viewH - (panelDocTop || 0) - 10));
+    if (mainPanelEl.style.height !== h + "px") mainPanelEl.style.height = h + "px";
+    if (wasNearBottom) chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  function remeasureAndFit(){ measurePanelTop(); fitChatPanel(); }
+  if (window.visualViewport){
+    // keyboard show/hide changes visualViewport.height only
+    window.visualViewport.addEventListener("resize", fitChatPanel);
+  }
+  window.addEventListener("resize", remeasureAndFit);
+  window.addEventListener("orientationchange", remeasureAndFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureAndFit);
+
   function setMode(m){
     mode = m;
     tabManual.classList.toggle("active", m==="manual");
@@ -449,6 +488,7 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
     personaDisabledBanner.classList.toggle("show", personaDisabled);
     moveThumb();
     renderChatForMode();
+    fitChatPanel();
   }
   tabManual.addEventListener("click", () => setMode("manual"));
   tabAuto.addEventListener("click", () => setMode("auto"));
@@ -487,6 +527,15 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
   const manualSend = document.getElementById("manual-send");
   const statusDot = document.getElementById("status-dot");
   const statusText = document.getElementById("status-text");
+
+  // Re-fit the chat panel as the keyboard animates in/out. visualViewport's
+  // "resize" event covers this on its own, but a few delayed passes make it
+  // reliable across browsers that fire it late or not at all.
+  if (manualInput){
+    const refit = delays => delays.forEach(d => setTimeout(fitChatPanel, d));
+    manualInput.addEventListener("focus", () => refit([0, 120, 280, 500]));
+    manualInput.addEventListener("blur",  () => refit([0, 160, 380]));
+  }
 
   async function sendManual(){
     const text = manualInput.value.trim();
@@ -903,6 +952,7 @@ Return valid JSON only, with no extra text and no Markdown, in exactly this stru
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveLangThumb);
   }
   window.addEventListener("resize", moveLangThumb);
+  requestAnimationFrame(remeasureAndFit);
 
   const heBtnEl = document.getElementById("lang-he");
   const enBtnEl = document.getElementById("lang-en");

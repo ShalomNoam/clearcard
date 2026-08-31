@@ -411,8 +411,11 @@
   /* Below the point where the grid stacks to one column, the strict
      viewport-lock (built for the two-column desktop layout) stops making
      sense - a phone doesn't have room for chat + persona picker + policy
-     all inside one screen height. Drop it and let the page scroll normally,
-     which is what people actually expect on mobile. */
+     all inside one screen height. The chat panel itself becomes the
+     "screen": it fills the viewport with the composer pinned to the bottom
+     edge (like a native chat app), so tapping the input needs no page
+     scroll and the conversation stays put. The sidebar flows below and is
+     reached by scrolling down. */
   @media (max-width:900px){
     html,body{height:auto;}
     body{height:auto;overflow-y:visible;display:block;}
@@ -420,15 +423,27 @@
     header.top{flex-direction:column;align-items:flex-end;gap:12px;margin-bottom:14px;}
     .mode-switch-wrap{margin-bottom:20px;}
     .mode-switch{min-width:0;width:100%;max-width:360px;}
-    .grid{flex:none;min-height:0;}
-    .main-panel{height:auto;}
-    /* dvh so the log shrinks with the on-screen keyboard instead of keeping
-       the input pinned far down the page (which forced a scroll-jump on tap) */
-    .chat-body{flex:none;height:58vh;height:58dvh;min-height:220px;}
-    .side{height:auto;overflow-y:visible;}
-    .chat-head{flex-wrap:wrap;row-gap:10px;}
+    .grid{display:block;flex:none;min-height:0;}
+    /* Fills the screen minus the header + mode-switch above it. JS
+       (fitChatPanel) refines this against the on-screen keyboard via
+       visualViewport; the calc() is the pre-JS / no-visualViewport
+       fallback. */
+    .main-panel{
+      height:calc(100vh - 190px);
+      height:calc(100dvh - 190px);
+      min-height:200px;
+      display:flex;flex-direction:column;
+    }
+    .chat-body{flex:1 1 auto;height:auto;min-height:100px;}
+    .side{height:auto;overflow-y:visible;margin-top:16px;}
+    /* one compact row - never let it grow to two lines and eat the space the
+       conversation needs when the keyboard is up */
+    .chat-head{flex-wrap:nowrap;gap:10px;padding:12px 16px;}
+    .chat-head .who{min-width:0;}
+    .chat-head .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .input-row{padding:12px 16px;}
     .input-row input{scroll-margin-block:20px;}
-    #manual-finish{white-space:nowrap;}
+    #manual-finish{white-space:nowrap;flex-shrink:0;}
     .persona-grid{gap:8px;}
   }
 
