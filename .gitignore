@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# local environment / secrets — never commit these
+.env
+.env.local
+.env.*.local
+
+# vercel
+.vercel
+
+# editor / OS cruft
+.DS_Store
+.claude/
+*.log

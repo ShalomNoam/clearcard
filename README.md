@@ -15,10 +15,6 @@ No deployment-config file is committed to this repo (there is no `vercel.json`, 
 auto-detects the static files and the `api/` serverless function; project-level settings (custom
 domain, environment variables) live in the Vercel dashboard.
 
-## Screenshot
-
-<!-- add a screenshot here -->
-
 ## The problem it solves
 
 A product team that wants to be sure an AI agent is ready for release to real customers currently
@@ -138,5 +134,6 @@ Set `GEMINI_API_KEY` (and optionally `GEMINI_MODEL`) in
 
 ## License
 
-No `LICENSE` file is present in this repository yet, and no license has been applied.
-**[Add a LICENSE file to declare usage terms.]**
+No open-source license has been applied, so the code is under standard copyright
+(all rights reserved) by default. It's published as a portfolio project — you're
+welcome to read through it.
